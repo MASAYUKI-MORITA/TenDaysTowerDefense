@@ -266,7 +266,7 @@ function Item(hp, quantity){
                     prob[8] = 7;
                 }
                 switch(prob[random(prob.length)]){
-                    case itemObj.tree.id:
+                    case itemObj.stone.id:
                         items[items.length] = new Item(itemObj.stone.hp, itemObj.stone.quantity + random(5));
                         stage[ry][rx] = itemObj.stone.id;
                     break;
@@ -307,8 +307,8 @@ function Trap(x, y, name){
 function Clock(){
     this.time = 0;
     this.day = 1;
-    this.dayLength = 80 * fps;
-    this.nightLength = 40 * fps;
+    this.dayLength = fps * 80;
+    this.nightLength = fps * 40;
     this.clearDay = 10;
 
     this.update = function(){
@@ -337,7 +337,7 @@ function Clock(){
             }
         }
 
-        if(this.time >= this.dayLength - fps * 3 || this.time >= this.nightLength - fps * 3){
+        if(this.time >= this.dayLength - fps * 1|| this.time >= this.nightLength - fps * 1){
             if(fout == null){
                 fout = setInterval(sound.fadeout, 100);
             }
