@@ -1,0 +1,48 @@
+body {
+    margin: 0;
+    background-color: black;
+}
+
+#stage {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#controller {
+    display: none;
+    margin-top: 15px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+button {
+    border-radius: 10px;
+    font-weight: bold;
+    color: white;
+}
+
+#up {
+    background-color: rgb(100, 100, 100);
+}
+
+#down {
+    background-color: rgb(100, 100, 100);
+}
+
+#left {
+    background-color: rgb(100, 100, 100);
+}
+
+#right {
+    background-color: rgb(100, 100, 100);
+}
+
+#aButton {
+    background-color: green;
+}
+
+#bButton {
+    background-color: red;
+}
