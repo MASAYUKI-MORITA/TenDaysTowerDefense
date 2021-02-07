@@ -758,8 +758,8 @@ function setCanvas(){
 
     menu.mulScale();
 
-    var flag = cW < 600 && cH - scale * H > 200 ? true : false;
-    if(flag){
+    var flag = cW < 600 ? (cH - scale * H > 200 ? 1 : 2) : 3;
+    if(flag == 1){
         var controller = document.getElementById("controller");
         controller.style.display = "flex";
         var button = controller.querySelectorAll("button");
@@ -768,34 +768,39 @@ function setCanvas(){
             button[i].style.height = ((cH - scale * H - 15) / 3.5) + "px";
             button[i].style.fontSize = scale / 2 + "px";
         }
-        setControl(flag);
-    } else {
-        setControl(flag);
     }
+    setControl(flag);
 }
 
 /*
 /* キーコンフィグ /*
 */
 function setControl(flag){
-    if(flag){
-        canvas.addEventListener("touchstart", mymousedown);
-        canvas.addEventListener("touchend", mykeyup);
+    switch(flag){
+        case 1:
+            canvas.addEventListener("touchstart", mymousedown);
+            canvas.addEventListener("touchend", mykeyup);
     
-        var buttons = [["up", up], ["down", down], ["left", left], ["right", right], ["aButton", aButton], ["bButton", bButton]];
-        for(var i = 0; i < buttons.length; i++){
-            var button = document.getElementById(buttons[i][0]);
-            button.onmousedown = buttons[i][1];
-            button.onmouseup = mykeyup;
-            button.addEventListener("touchstart", buttons[i][1]);
-            button.addEventListener("touchend", mykeyup);
-        }
-    } else {
-        window.onkeydown = mykeydown;
-        window.onkeyup = mykeyup;
+            var buttons = [["up", up], ["down", down], ["left", left], ["right", right], ["aButton", aButton], ["bButton", bButton]];
+            for(var i = 0; i < buttons.length; i++){
+                var button = document.getElementById(buttons[i][0]);
+                button.onmousedown = buttons[i][1];
+                button.onmouseup = mykeyup;
+                button.addEventListener("touchstart", buttons[i][1]);
+                button.addEventListener("touchend", mykeyup);
+            }
+        break;
+        case 2:
+            canvas.addEventListener("touchstart", mymousedown);
+            canvas.addEventListener("touchend", mykeyup);
+        break;
+        case 3:
+            window.onkeydown = mykeydown;
+            window.onkeyup = mykeyup;
         
-        canvas.onmousedown = mymousedown;
-        canvas.onmouseup = mykeyup;
+            canvas.onmousedown = mymousedown;
+            canvas.onmouseup = mykeyup;
+        break;
     }
 
     canvas.oncontextmenu = function(e){
