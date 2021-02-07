@@ -406,6 +406,7 @@ function Sound(){
     this.stopSound = function(){
         bgm.pause();
         bgm.currentTime = 0;
+        console.log("stop");
     }
 
     this.fadein = function(){
@@ -459,7 +460,10 @@ function StartMenu(){
         x: 3, y: H - 2, w: 1, h: 1
     };
 
-    this.survivorCount = 0;
+    this.survCount = 0;
+    this.survBtnPosition = {
+        x: [1, W - 2], y: H - 2, w: 1, h: 1
+    };
 
     this.mulScale = function(){
         this.mx *= scale;
@@ -478,11 +482,17 @@ function StartMenu(){
         this.backBtnPosition.y *= scale;
         this.backBtnPosition.w *= scale;
         this.backBtnPosition.h *= scale;
+
+        this.survBtnPosition.x[0] *= scale;
+        this.survBtnPosition.x[1] *= scale;
+        this.survBtnPosition.y *= scale;
+        this.survBtnPosition.w *= scale;
+        this.survBtnPosition.h *= scale;
     }
 
     this.indicateStartMenu = function(){
         this.scene = this.init;
-        this.survivorCount = 0;
+        this.survCount = 0;
         repaint();
 
         for(var i = 0; i < Object.keys(this.units).length; i++){
@@ -520,6 +530,15 @@ function StartMenu(){
             if(this.backBtnPosition.x <= mx && mx <= this.backBtnPosition.x + this.backBtnPosition.w && this.backBtnPosition.y <= my && my <= this.backBtnPosition.y + this.backBtnPosition.h){
                 this.indicateStartMenu();
             }
+
+            if(this.survBtnPosition.x[0] <= mx && mx <= this.survBtnPosition.x[0] + this.survBtnPosition.w && this.survBtnPosition.y <= my && my <= this.survBtnPosition.y + this.survBtnPosition.h){
+                this.survCount >= 1 ? this.survCount-- : this.survCount = 0;
+                this.units.survivor.method();
+            }
+            if(this.survBtnPosition.x[1] <= mx && mx <= this.survBtnPosition.x[1] + this.survBtnPosition.w && this.survBtnPosition.y <= my && my <= this.survBtnPosition.y + this.survBtnPosition.h){
+                this.survCount++;
+                this.units.survivor.method();
+            }
         }
     }
 }
@@ -542,10 +561,18 @@ function survivor(json){
     drawText(scale * 1, scale * 2, "white", scale * 0.6 + "px Lato", "生存者数: ");
     drawText(scale * 4, scale * 2, "white", scale * 1.2 + "px Lato", json.number[0]);
 
+    drawFill(menu.survBtnPosition.x[0], menu.survBtnPosition.y, menu.survBtnPosition.w, menu.survBtnPosition.h, "rgba(255, 255, 255, 0.1)");
+    drawFill(menu.survBtnPosition.x[1], menu.survBtnPosition.y, menu.survBtnPosition.w, menu.survBtnPosition.h, "rgba(255, 255, 255, 0.1)");
+
+    drawText(scale * 1, scale * (H - 1.05), "white", scale * 1.15 + "px Lato", "◀");
+    drawText(scale * (W - 2.15), scale * (H - 1.05), "white", scale * 1.15 + "px Lato", "▶");
+
     var survivors = json.username;
-    var len = survivors.length - menu.survivorCount * 8 > 8 ? 8 : survivors.length - menu.survivorCount * 8;
+    menu.survCount = menu.survCount > Math.ceil(survivors.length / 8) - 1 ? menu.survCount = Math.ceil(survivors.length / 8) - 1 : menu.survCount;
+    var sCount = menu.survCount;
+    var len = survivors.length - sCount * 8 > 8 ? 8 : survivors.length - sCount * 8;
     for(var i = 0; i < len; i++){
-        drawText(scale * 1, scale * (2.8 + i * 0.7), "white", scale * 0.38 + "px Lato", "・ " + survivors[i]);
+        drawText(scale * 1, scale * (2.8 + i * 0.7), "white", scale * 0.38 + "px Lato", "・ " + survivors[i + (sCount * 8)]);
     }
 }
 
@@ -731,7 +758,8 @@ function setCanvas(){
 
     menu.mulScale();
 
-    if(cW < 600 && cH - scale * H > 200){
+    var flag = cW < 600 && cH - scale * H > 200 ? true : false;
+    if(flag){
         var controller = document.getElementById("controller");
         controller.style.display = "flex";
         var button = controller.querySelectorAll("button");
@@ -740,34 +768,39 @@ function setCanvas(){
             button[i].style.height = ((cH - scale * H - 15) / 3.5) + "px";
             button[i].style.fontSize = scale / 2 + "px";
         }
+        setControl(flag);
+    } else {
+        setControl(flag);
     }
-
-    setControl();
 }
 
 /*
 /* キーコンフィグ /*
 */
-function setControl(){
-    window.onkeydown = mykeydown;
-    window.onkeyup = mykeyup;
+function setControl(flag){
+    if(flag){
+        canvas.addEventListener("touchstart", mymousedown);
+        canvas.addEventListener("touchend", mykeyup);
+    
+        var buttons = [["up", up], ["down", down], ["left", left], ["right", right], ["aButton", aButton], ["bButton", bButton]];
+        for(var i = 0; i < buttons.length; i++){
+            var button = document.getElementById(buttons[i][0]);
+            button.onmousedown = buttons[i][1];
+            button.onmouseup = mykeyup;
+            button.addEventListener("touchstart", buttons[i][1]);
+            button.addEventListener("touchend", mykeyup);
+        }
+    } else {
+        window.onkeydown = mykeydown;
+        window.onkeyup = mykeyup;
+        
+        canvas.onmousedown = mymousedown;
+        canvas.onmouseup = mykeyup;
+    }
 
-    canvas.onmousedown = mymousedown;
-    canvas.onmouseup = mykeyup;
     canvas.oncontextmenu = function(e){
         e.preventDefault();
     };
-    canvas.addEventListener("touchstart", mymousedown);
-    canvas.addEventListener("touchend", mykeyup);
-
-    var buttons = [["up", up], ["down", down], ["left", left], ["right", right], ["aButton", aButton], ["bButton", bButton]];
-    for(var i = 0; i < buttons.length; i++){
-        var button = document.getElementById(buttons[i][0]);
-        button.onmousedown = buttons[i][1];
-        button.onmouseup = mykeyup;
-        button.addEventListener("touchstart", buttons[i][1]);
-        button.addEventListener("touchend", mykeyup);
-    }
 
     setImgs();
     document.querySelectorAll("img").onload = menu.indicateStartMenu();
@@ -898,7 +931,7 @@ function repaintEtc(){
     if(status == MENU){
         drawFill(menu.mx, menu.my, menu.mw, menu.mh, "rgba(0, 0, 0, 0.9)");
         if(menu.scene != menu.init){
-            drawStroke(menu.backBtnPosition.x, menu.backBtnPosition.y, menu.backBtnPosition.w, menu.backBtnPosition.h, "white", 2);
+            drawFill(menu.backBtnPosition.x, menu.backBtnPosition.y, menu.backBtnPosition.w, menu.backBtnPosition.h, "rgba(255, 255, 255, 0.1)");
             drawText(scale * 2.98, scale * (H - 0.9), "white", scale * 1.8 + "px Lato", "×");
         }
     } else if(status == GAMECLEAR){
